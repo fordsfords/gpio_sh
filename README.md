@@ -71,7 +71,7 @@ These instructions assume you are in a shell prompt on CHIP.
 * Since accessing GPIO pins requires root access, the calling script should
 typically be run with "sudo".  For example:
 
-    sudo ./gpio_example.sh
+        sudo ./gpio_example.sh
 
 * The gpio.sh script must be sourced so that the shell variables defined will be
 available to the caller.
@@ -97,7 +97,9 @@ value.
 value.  It is made available to the caller via its return status "$?".
 Remember that the return status variable is ephemeral, so it is strongly
 suggested to copy its value into a regular shell variable.  For example:
+
         gpio_input $XIO_P0; VAL=$?
+
 * **gpio_unexport** *gpio* - close the GPIO pin.
 * **gpio_unexport_all** - close ALL opened GPIO pins.  ***WARNING:*** this is
 potentially disruptive.  It does NOT restrict itself to only those pins opened
