@@ -57,14 +57,16 @@ These instructions assume you are in a shell prompt on CHIP.
         chmod +x gpio_example.sh
         sudo ./gpio_example.sh
 
-3. It can also be used for interactive work:
+3. It can also be used for interactive work (as root):
 
+        sudo bash  # enter root shell
         source /usr/local/bin/gpio.sh
-        gpio_export $XIO_P0
-        gpio_direction $XIO_P0 in
-        gpio_input $XIO_P0; VAL=$?
+        gpio_export XIO_P0
+        gpio_direction XIO_P0 in
+        gpio_input XIO_P0; VAL=$?
         echo $VAL
-        gpio_unexport $XIO_P0
+        gpio_unexport XIO_P0
+        exit  # exit root shell
 
 ## API Notes
 
