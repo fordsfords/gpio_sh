@@ -1,13 +1,34 @@
 # gpio.sh - BASH code intended to be "sourced" by user script.
+# Version 23-Jul-2016
 
 gpio_export()
 {
-  echo $1 >/sys/class/gpio/export
+  # Accept numeric argument
+  if echo "$1" | egrep '^[0-9][0-9]*$' >/dev/null; then :
+    GPIO=$1
+  elif [ -n "${GPIO_HASH[$1]}" ]; then :
+    GPIO=${GPIO_HASH[$1]}
+  else :
+    echo "gpio_export: unrecognized GPIO ID '$1'" >&2
+    return
+  fi
+  echo $GPIO >/sys/class/gpio/export
+  return $?
 }
 
 gpio_unexport()
 {
-  echo $1 >/sys/class/gpio/unexport
+  # Accept numeric argument
+  if echo "$1" | egrep '^[0-9][0-9]*$' >/dev/null; then :
+    GPIO=$1
+  elif [ -n "${GPIO_HASH[$1]}" ]; then :
+    GPIO=${GPIO_HASH[$1]}
+  else :
+    echo "gpio_unexport: unrecognized GPIO ID '$1'" >&2
+    return
+  fi
+  echo $GPIO >/sys/class/gpio/unexport
+  return $?
 }
 
 gpio_unexport_all()
@@ -23,74 +44,112 @@ gpio_unexport_all()
 
 gpio_direction()
 {
-  echo $2 >/sys/class/gpio/gpio${1}/direction
+  # Accept numeric argument
+  if echo "$1" | egrep '^[0-9][0-9]*$' >/dev/null; then :
+    GPIO=$1
+  elif [ -n "${GPIO_HASH[$1]}" ]; then :
+    GPIO=${GPIO_HASH[$1]}
+  else :
+    echo "gpio_direction: unrecognized GPIO ID '$1'" >&2
+    return
+  fi
+  echo $2 >/sys/class/gpio/gpio${GPIO}/direction
+  return $?
 }
 
 gpio_output()
 {
-  echo $2 >/sys/class/gpio/gpio${1}/value
+  # Accept numeric argument
+  if echo "$1" | egrep '^[0-9][0-9]*$' >/dev/null; then :
+    GPIO=$1
+  elif [ -n "${GPIO_HASH[$1]}" ]; then :
+    GPIO=${GPIO_HASH[$1]}
+  else :
+    echo "gpio_output: unrecognized GPIO ID '$1'" >&2
+    return
+  fi
+  echo $2 >/sys/class/gpio/gpio${GPIO}/value
+  return $?
 }
 
 gpio_input()
 {
-  VAL=`cat /sys/class/gpio/gpio${1}/value`
+  # Accept numeric argument
+  if echo "$1" | egrep '^[0-9][0-9]*$' >/dev/null; then :
+    GPIO=$1
+  elif [ -n "${GPIO_HASH[$1]}" ]; then :
+    GPIO=${GPIO_HASH[$1]}
+  else :
+    echo "gpio_input: unrecognized GPIO ID '$1'" >&2
+    return
+  fi
+  VAL=`cat /sys/class/gpio/gpio${GPIO}/value`
   return $VAL
 }
 
-export PWM0=34
-export AP_EINT3=35
-export TWI1_SCK=47
-export TWI1_SDA=48
-export TWI2_SCK=49
-export TWI2_SDA=50
-export LCD_D2=98
-export LCD_D3=99
-export LCD_D4=100
-export LCD_D5=101
-export LCD_D6=102
-export LCD_D7=103
-export LCD_D10=106
-export LCD_D11=107
-export LCD_D12=108
-export LCD_D13=109
-export LCD_D14=110
-export LCD_D15=111
-export LCD_D18=114
-export LCD_D19=115
-export LCD_D20=116
-export LCD_D21=117
-export LCD_D22=118
-export LCD_D23=119
-export LCD_CLK=120
-export LCD_DE=121
-export LCD_HSYNC=122
-export LCD_VSYNC=123
-export CSIPCK=128
-export CSICK=129
-export CSIHSYNC=130
-export CSIVSYNC=131
-export CSID0=132
-export CSID1=133
-export CSID2=134
-export CSID3=135
-export CSID4=136
-export CSID5=137
-export CSID6=138
-export CSID7=139
-export AP_EINT1=193
-export UART1_TX=195
-export UART1_RX=196
+
+# Create hash (associative array) for pins
+declare -A GPIO_HASH
+
+GPIO_HASH["PWM0"]=34
+GPIO_HASH["AP_EINT3"]=35
+GPIO_HASH["TWI1_SCK"]=47
+GPIO_HASH["TWI1_SDA"]=48
+GPIO_HASH["TWI2_SCK"]=49
+GPIO_HASH["TWI2_SDA"]=50
+GPIO_HASH["LCD_D2"]=98
+GPIO_HASH["LCD_D3"]=99
+GPIO_HASH["LCD_D4"]=100
+GPIO_HASH["LCD_D5"]=101
+GPIO_HASH["LCD_D6"]=102
+GPIO_HASH["LCD_D7"]=103
+GPIO_HASH["LCD_D10"]=106
+GPIO_HASH["LCD_D11"]=107
+GPIO_HASH["LCD_D12"]=108
+GPIO_HASH["LCD_D13"]=109
+GPIO_HASH["LCD_D14"]=110
+GPIO_HASH["LCD_D15"]=111
+GPIO_HASH["LCD_D18"]=114
+GPIO_HASH["LCD_D19"]=115
+GPIO_HASH["LCD_D20"]=116
+GPIO_HASH["LCD_D21"]=117
+GPIO_HASH["LCD_D22"]=118
+GPIO_HASH["LCD_D23"]=119
+GPIO_HASH["LCD_CLK"]=120
+GPIO_HASH["LCD_DE"]=121
+GPIO_HASH["LCD_HSYNC"]=122
+GPIO_HASH["LCD_VSYNC"]=123
+GPIO_HASH["CSIPCK"]=128
+GPIO_HASH["CSICK"]=129
+GPIO_HASH["CSIHSYNC"]=130
+GPIO_HASH["CSIVSYNC"]=131
+GPIO_HASH["CSID0"]=132
+GPIO_HASH["CSID1"]=133
+GPIO_HASH["CSID2"]=134
+GPIO_HASH["CSID3"]=135
+GPIO_HASH["CSID4"]=136
+GPIO_HASH["CSID5"]=137
+GPIO_HASH["CSID6"]=138
+GPIO_HASH["CSID7"]=139
+GPIO_HASH["AP_EINT1"]=193
+GPIO_HASH["UART1_TX"]=195
+GPIO_HASH["UART1_RX"]=196
 
 # The XIO pins change their base number across different versions of CHIPOS.
 # Derive the correct base number.
 XIO_LABEL_FILE=`grep -l pcf8574a /sys/class/gpio/*/*label`
 XIO_BASE_FILE=`dirname $XIO_LABEL_FILE`/base
 XIO_BASE=`cat $XIO_BASE_FILE`
-export XIO_P0=$XIO_BASE
-export XIO_P1=$((XIO_BASE + 1))
-export XIO_P2=$((XIO_BASE + 2))
-export XIO_P3=$((XIO_BASE + 3))
-export XIO_P4=$((XIO_BASE + 4))
-export XIO_P5=$((XIO_BASE + 5))
-export XIO_P6=$((XIO_BASE + 6))
-export XIO_P7=$((XIO_BASE + 7))
+GPIO_HASH["XIO_P0"]=$XIO_BASE
+GPIO_HASH["XIO_P1"]=$((XIO_BASE + 1))
+GPIO_HASH["XIO_P2"]=$((XIO_BASE + 2))
+GPIO_HASH["XIO_P3"]=$((XIO_BASE + 3))
+GPIO_HASH["XIO_P4"]=$((XIO_BASE + 4))
+GPIO_HASH["XIO_P5"]=$((XIO_BASE + 5))
+GPIO_HASH["XIO_P6"]=$((XIO_BASE + 6))
+GPIO_HASH["XIO_P7"]=$((XIO_BASE + 7))
+
+# Scan the hash and create individual shell variables for each pin
+for GPIO in ${!GPIO_HASH[*]}; do :
+  eval $GPIO=${GPIO_HASH["$GPIO"]}
+done

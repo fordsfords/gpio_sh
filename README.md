@@ -80,9 +80,17 @@ available to the caller.
 documentation's [Physical
 Connectors](http://docs.getchip.com/chip.html#physical-connectors) section
 (scroll down to the "Pin Headers" sub-section), except that all dashes ("-")
-should be entered as underscores ("_").  Also, since the symbols are just shell
-variables, a dollar sign ("$") must be used to tell BASH to substitute the
-value of the variable.  Thus, to access XIO-P1, enter it as $XIO_P1
+should be entered as underscores ("_").  When gpio.sh is sourced, it defines
+a set of shell variables with the same names as the GPIO names.  For example,
+the $XIO_P7 substitutes the proper numeric value.
+
+* When passing a GPIO identifier to a method, you can either pass the shell
+variable substitution, which is just the numeric value, or you can pass the
+GPIO name as a string.  All three of the following lines export CSID0:
+
+        gpio_export CSID0
+        gpio_export $CSID0
+        gpio_export 132    # not recommended.
 
 * Many pins on CHIP's pin headers are *not* GPIOs.  For example, GND and VCC-5V
 cannot be accessed with software.  The list of symbols defined by gpio.sh
@@ -98,7 +106,7 @@ value.  It is made available to the caller via its return status "$?".
 Remember that the return status variable is ephemeral, so it is strongly
 suggested to copy its value into a regular shell variable.  For example:
 
-        gpio_input $XIO_P0; VAL=$?
+        gpio_input XIO_P0; VAL=$?
 
 * **gpio_unexport** *gpio* - close the GPIO pin.
 * **gpio_unexport_all** - close ALL opened GPIO pins.  ***WARNING:*** this is
@@ -108,6 +116,12 @@ and closes them.  If you are running other software which accesses GPIOs, using
 "gpio_unexport_all" will disrupt the operation of that other software.
 
 ## Release Notes
+
+* 23-Jul-2016
+
+    * Added ability to pass the GPIO name without the $.
+    * Added extra error checking.
+    * Added version number (release date) to gpio.sh file
 
 * 30-Jun-2016
 
